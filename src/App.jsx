@@ -5,15 +5,14 @@ import heroImg from './assets/hero.png'
 import "./index.css";
 import { Plus, Trash2 } from "lucide-react";
 import Navbar  from './navbar/Navbar';
-import Footer from './component/footer'; // check your path carefully
+import Footer from './component/footer'; 
+import HomePage from './component/HomePage';
 
 function App() {
   return (
     <>
       <Navbar />
-      <h1 className="text-4xl font-bold text-blue-500">gari</h1>
-       <Plus className="w-6 h-6 text-green-500" />
-      <Trash2 className="w-6 h-6 text-red-500" />
+      <HomePage />
       <Footer />
     </>
   )
