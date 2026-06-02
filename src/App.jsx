@@ -7,12 +7,14 @@ import { Plus, Trash2 } from "lucide-react";
 import Navbar  from './navbar/Navbar';
 import Footer from './component/footer'; 
 import HomePage from './component/HomePage';
+import ShoppingCart from './component/ShoppingCart';
 
 function App() {
   return (
     <>
       <Navbar />
       <HomePage />
+      <ShoppingCart />
       <Footer />
     </>
   )
