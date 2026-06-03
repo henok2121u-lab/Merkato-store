@@ -1,157 +1,136 @@
-import React from 'react';
+import { motion } from 'framer-motion';
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 
-const ShoppingCart = ({ cartItems, onUpdateQuantity, onRemoveItem, onProceedToCheckout }) => {
+export default function ShoppingCart({ cart, onClose, onUpdateQuantity, onRemoveItem, onNavigateToCheckout }) {
   
-  // Calculate Subtotal dynamic value
-  const subtotal = cartItems.reduce((acc, item) => {
-    // Helper to extract numerical value from strings like "2,400 ETB"
-    const numericPrice = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
-    return acc + (numericPrice * item.quantity);
-  }, 0);
-
-  const deliveryFee = subtotal > 0 ? 150 : 0; // Simple manual delivery fee setting as per MVP spec
-  const totalAmount = subtotal + deliveryFee;
+  // Calculate aggregate cart total valuation
+  const totalCartPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-[#0A192F] font-sans pb-16 pt-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        
-        {/* Header Label */}
-        <div className="flex items-center justify-between border-b border-gray-200 pb-5 mb-8">
-          <h1 className="text-2xl font-black tracking-tight text-[#0A192F] uppercase">
-            Your Shopping Cart <span className="text-yellow-400 font-black">.</span>
-          </h1>
-          <span className="text-sm font-semibold bg-[#0A192F] text-white px-3 py-1 rounded-xl">
-            {cartItems.reduce((sum, item) => sum + item.quantity, 0)} Items
-          </span>
-        </div>
+    <div className="fixed inset-0 z-50 overflow-hidden font-sans">
+      {/* Backdrop blur overlay layer */}
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
 
-        {cartItems.length === 0 ? (
-          /* Empty Cart View State */
-          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300 shadow-xs animate-fade-in">
-            <svg className="w-16 h-16 mx-auto text-gray-300 stroke-current fill-none stroke-1.5" viewBox="0 0 24 24">
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
-              <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"></path>
-            </svg>
-            <p className="mt-4 text-gray-500 font-bold">Your shopping cart is currently empty.</p>
-            <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">Add items from the marketplace directory to begin your validation purchase checkout.</p>
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
+        <motion.div 
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'tween', duration: 0.3 }}
+          className="w-screen max-w-md bg-[#0A192F] border-l border-gray-800 text-white flex flex-col shadow-2xl"
+        >
+          {/* Header Panel */}
+          <div className="px-6 py-5 border-b border-gray-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-yellow-500" />
+              <h2 className="text-lg font-serif font-bold tracking-wide">Your Vault Collection</h2>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-white rounded-full hover:bg-gray-900 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        ) : (
-          /* Active Cart Grid System */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            
-            {/* Left Side: Product Items List Block */}
-            <div className="lg:col-span-2 space-y-4">
-              {cartItems.map((item) => (
-                <div 
-                  key={item.id}
-                  className="flex flex-col sm:flex-row items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 shadow-xs hover:shadow-md transition-all duration-300 group"
+
+          {/* Core Interactive Product Feed */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            {cart.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center opacity-60 py-20">
+                <ShoppingBag className="w-12 h-12 stroke-[1] text-gray-500 mb-4 animate-pulse" />
+                <p className="text-sm font-light text-gray-400">Your shopping cart is currently empty.</p>
+                <button 
+                  onClick={onClose}
+                  className="mt-4 text-xs text-yellow-500 underline uppercase tracking-wider font-semibold"
                 >
-                  {/* Product Details Section */}
-                  <div className="flex items-center space-x-4 w-full sm:w-auto">
-                    <div className="w-20 h-20 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 relative">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-sm text-[#0A192F] line-clamp-1 group-hover:text-yellow-600 transition-colors">{item.name}</h3>
-                      <p className="text-xs text-gray-400 mt-0.5">{item.category}</p>
-                      <p className="text-sm font-extrabold text-[#0A192F] mt-1">{item.price}</p>
-                    </div>
+                  Continue Browsing
+                </button>
+              </div>
+            ) : (
+              cart.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="flex items-center gap-4 bg-gray-900/50 border border-gray-800 p-3 rounded-xl relative group"
+                >
+                  {/* Thumbnail */}
+                  <div className="w-20 h-20 bg-gray-950 rounded-lg overflow-hidden flex-shrink-0 border border-gray-800">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
 
-                  {/* Quantity Actions & Remove Interactions wrapper */}
-                  <div className="flex items-center justify-between sm:justify-end space-x-6 w-full sm:w-auto mt-4 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                    
-                    {/* Multiplier Toggles */}
-                    <div className="flex items-center bg-gray-100 rounded-xl p-1 border border-gray-200/60">
+                  {/* Metadata Stack */}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-serif font-bold text-gray-200 truncate pr-6">
+                      {item.name}
+                    </h4>
+                    <p className="text-xs text-gray-500 font-light mt-0.5">{item.category}</p>
+                    <span className="text-sm font-mono font-bold text-yellow-400 block mt-1">
+                      ${item.price.toLocaleString()}
+                    </span>
+
+                    {/* Micro-Counter Interactor for Quantity Upgrades */}
+                    <div className="flex items-center bg-gray-950 border border-gray-800 rounded-lg p-0.5 w-max mt-2">
                       <button 
-                        onClick={() => item.quantity > 1 ? onUpdateQuantity(item.id, item.quantity - 1) : onRemoveItem(item.id)}
-                        className="w-8 h-8 flex items-center justify-center font-bold text-gray-500 hover:text-[#0A192F] rounded-lg hover:bg-white transition-all active:scale-90"
+                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                        className="p-1 text-gray-400 hover:text-white"
                       >
-                        -
+                        <Minus className="w-3 h-3" />
                       </button>
-                      <span className="w-10 text-center text-xs font-black text-[#0A192F]">
+                      <span className="w-6 text-center font-mono text-xs font-semibold text-gray-300">
                         {item.quantity}
                       </span>
                       <button 
-                        disabled={item.quantity >= item.stock}
                         onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                        className={`w-8 h-8 flex items-center justify-center font-bold rounded-lg transition-all active:scale-90 ${
-                          item.quantity >= item.stock 
-                            ? 'text-gray-300 cursor-not-allowed' 
-                            : 'text-gray-500 hover:text-[#0A192F] hover:bg-white'
-                        }`}
+                        className="p-1 text-gray-400 hover:text-white"
                       >
-                        +
+                        <Plus className="w-3 h-3" />
                       </button>
                     </div>
-
-                    {/* Trash Execution Button */}
-                    <button 
-                      onClick={() => onRemoveItem(item.id)}
-                      className="text-gray-400 hover:text-red-500 p-2 rounded-xl hover:bg-red-50/60 transition-colors"
-                      aria-label="Remove item"
-                    >
-                      <svg className="w-5 h-5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                      </svg>
-                    </button>
                   </div>
 
+                  {/* Absolute Positioning Delete Node */}
+                  <button 
+                    onClick={() => onRemoveItem(item.id)}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-red-400 transition-colors opacity-80 lg:opacity-0 lg:group-hover:opacity-100 p-1"
+                    aria-label="Remove item"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-              ))}
-            </div>
+              ))
+            )}
+          </div>
 
-            {/* Right Side: Invoice Summary Card Block */}
-            <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-yellow-400"></div>
-              
-              <h2 className="text-lg font-black text-[#0A192F] mb-4 tracking-tight uppercase">Order Summary</h2>
-              
-              <div className="space-y-3.5 text-sm pb-4 border-b border-gray-100">
-                <div className="flex justify-between text-gray-500 font-medium">
-                  <span>Subtotal</span>
-                  <span className="text-[#0A192F] font-bold">{subtotal.toLocaleString()} ETB</span>
-                </div>
-                <div className="flex justify-between text-gray-500 font-medium">
-                  <span>Delivery Fee</span>
-                  <span className="text-[#0A192F] font-bold">{deliveryFee} ETB</span>
-                </div>
+          {/* Checkout Calculations Panel Footer */}
+          {cart.length > 0 && (
+            <div className="p-6 bg-gray-950 border-t border-gray-800 space-y-4">
+              <div className="flex items-center justify-between text-sm text-gray-400 font-light">
+                <span>Shipping & Insurance</span>
+                <span className="text-yellow-500 font-mono text-xs uppercase tracking-widest">Complimentary</span>
               </div>
-
-              <div className="flex justify-between items-center py-4 mb-6">
-                <span className="text-base font-bold text-[#0A192F]">Total Amount</span>
-                <span className="text-xl font-extrabold text-[#0A192F] tracking-tight">
-                  {totalAmount.toLocaleString()} ETB
+              <div className="flex items-center justify-between pt-2 border-t border-gray-900">
+                <span className="text-sm font-medium text-gray-300">Estimated Valuation Total</span>
+                <span className="text-2xl font-serif font-bold text-white font-mono">
+                  ${totalCartPrice.toLocaleString()}
                 </span>
               </div>
 
-              {/* Action Trigger Link */}
-              <button
-                onClick={onProceedToCheckout}
-                className="w-full bg-[#0A192F] hover:bg-yellow-400 text-white hover:text-[#0A192F] py-3.5 rounded-2xl font-bold transition-all duration-300 shadow-md hover:shadow-yellow-400/20 flex items-center justify-center space-x-2 active:scale-[0.98]"
+              {/* Secure Checkout Screen Routing CTA Button */}
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onNavigateToCheckout}
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-[#0A192F] font-bold py-4 rounded-xl shadow-xl flex items-center justify-center gap-2 mt-2 transition-transform"
               >
                 <span>Proceed to Checkout</span>
-                <svg className="w-4 h-4 fill-none stroke-current stroke-2 animate-pulse" viewBox="0 0 24 24">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </button>
-
-              <p className="text-[10px] text-center text-gray-400 mt-4 font-medium uppercase tracking-wider">
-                ⚡ Cash On Delivery Mode Active ⚡
-              </p>
+                <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+              </motion.button>
             </div>
-
-          </div>
-        )}
+          )}
+        </motion.div>
       </div>
     </div>
   );
-};
-
-export default ShoppingCart;
+}
