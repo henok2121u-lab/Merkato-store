@@ -1,14 +1,16 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
-import './index.css'; // Make sure your Tailwind directives are inside this file!
+import './index.css';
 
-// Targets the <div id="root"></div> inside your index.html file
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 root.render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </StrictMode>
 );
